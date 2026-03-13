@@ -139,6 +139,16 @@ If I were taking this from demo to stronger pilot / customer-facing POC, the nex
 - persisted session history
 - deployment + auth polish
 
+## Demo / Loom Checklist
+For a fast pre-sales walkthrough, show this sequence:
+1. create session
+2. join room
+3. publish mic
+4. start browser transcription
+5. ask one customer-style question aloud
+6. let the concierge respond
+7. point out provider/model visibility and low-cost architecture choices
+
 ## Repo structure
 
 - `app/` — Next.js application
