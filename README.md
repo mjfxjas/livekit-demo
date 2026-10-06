@@ -58,9 +58,15 @@ Open `http://localhost:3000`.
 From `app/`:
 
 ```bash
+npm test
 npm run lint
 npm run build
 ```
+
+`npm test` requires Node.js 22.18+ and runs API regression tests with local
+LiveKit signing credentials, without contacting LiveKit or an AI provider.
+Display names may repeat; each token receives a separate participant identity.
+Names are limited to 80 characters and concierge messages to 2000 characters.
 
 To check the voice flow: create a session, join the room, publish the microphone,
 and start transcription. With auto-send enabled, a finalized transcript should

@@ -14,15 +14,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const requestedName = typeof body.name === 'string' ? body.name.trim() : '';
-    const identity = requestedName || `guest-${randomUUID().slice(0, 8)}`;
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return Response.json({ error: 'A JSON object is required.' }, { status: 400 });
+    }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json({ error: 'A JSON object is required.' }, { status: 400 });
+    }
+    const name = (body as { name?: unknown }).name;
+    if (name !== undefined && (typeof name !== 'string' || name.length > 80)) {
+      return Response.json({ error: 'Name must be a string of at most 80 characters.' }, { status: 400 });
+    }
+    const displayName = (typeof name === 'string' ? name.trim() : '') || 'Guest';
+    // A display name is not unique: sharing an identity evicts the first session.
+    const identity = `guest-${randomUUID()}`;
     const room = `${LIVEKIT_ROOM_PREFIX}-${new Date().toISOString().slice(0, 10)}`;
 
     const token = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity,
       ttl: '10m',
-      name: identity,
+      name: displayName,
     });
 
     token.addGrant({
@@ -36,6 +49,7 @@ export async function POST(request: Request) {
       token: await token.toJwt(),
       room,
       identity,
+      displayName,
       url: process.env.NEXT_PUBLIC_LIVEKIT_URL || process.env.LIVEKIT_URL || '',
     });
   } catch (error) {

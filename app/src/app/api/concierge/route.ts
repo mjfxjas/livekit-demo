@@ -79,8 +79,20 @@ async function tryOpenAI(message: string) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => ({}));
-    const message = typeof body.message === 'string' ? body.message.trim() : '';
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return Response.json({ error: 'A JSON object is required.' }, { status: 400 });
+    }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json({ error: 'A JSON object is required.' }, { status: 400 });
+    }
+    const input = (body as { message?: unknown }).message;
+    if (typeof input !== 'string' || input.length > 2000) {
+      return Response.json({ error: 'Message must be a string of at most 2000 characters.' }, { status: 400 });
+    }
+    const message = input.trim();
 
     if (!message) {
       return Response.json({ error: 'Message is required.' }, { status: 400 });
